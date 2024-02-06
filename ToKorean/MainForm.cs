@@ -1,3 +1,5 @@
+using System.Text;
+using ToKorean.IO;
 using ToKorean.Papago;
 
 namespace ToKorean
@@ -43,5 +45,26 @@ namespace ToKorean
             Console.WriteLine(kor);
         }
 
+        private void GetYmlFile(object? sender, EventArgs e)
+        {
+            string ymlPath = new FileDialogHelper(".yml|*.yml").GetFilePath();
+
+            if (string.IsNullOrEmpty(ymlPath) ||
+                !File.Exists(ymlPath))
+            {
+                Console.WriteLine("yml파일을 찾을 수 없습니다.");
+                return;
+            }
+
+            string[] ymlLines = File.ReadAllLines(ymlPath);
+            StringBuilder sb = new StringBuilder();
+
+            foreach (string line in ymlLines)
+            {
+                sb.AppendLine(line);
+            }
+            
+            txtOrigin.Text = sb.ToString();
+        }
     }
 }
