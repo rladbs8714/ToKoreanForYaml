@@ -5,7 +5,7 @@ using ToKorean.Http;
 
 namespace ToKorean.Papago
 {
-    internal class PapagoHelper : HttpHelper
+    internal class PapagoHelper : HttpHelper, IPapagoHelper
     {
 
         #region SINGLETON
@@ -88,16 +88,19 @@ namespace ToKorean.Papago
         /// </summary>
         /// <param name="engs">원문 리스트</param>
         /// <returns>번역된 한글 문자열 리스트. 새로운 배열이 생성된다.</returns>
-        public async Task<string[]> TranslateToKorean(string[] engs)
+        public Task<string[]> TranslateToKorean(string[] engs)
         {
-            string[] kors = new string[engs.Length];
-
-            for (int i = 0; i < engs.Length; i++)
+            return Task.Run(async () =>
             {
-                kors[i] = await TranslateToKorean(engs[i]);
-            }
+                string[] kors = new string[engs.Length];
 
-            return kors;
+                for (int i = 0; i < engs.Length; i++)
+                {
+                    kors[i] = await TranslateToKorean(engs[i]);
+                }
+
+                return kors;
+            });
         }
 
         /// <summary>
@@ -127,5 +130,7 @@ namespace ToKorean.Papago
 
             return vo.message.result.translatedText;
         }
+
+
     }
 }

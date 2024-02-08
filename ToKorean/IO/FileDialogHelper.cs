@@ -8,17 +8,56 @@ namespace ToKorean.IO
 {
     internal class FileDialogHelper : IDisposable
     {
+
+        // ==============================================================================
+        // ENUM
+        // ==============================================================================
+
+        public enum EFilter
+        {
+            YML = 1,
+            TXT = 2,
+            JSON = 4,
+            ALL = 1048,
+        }
+
+
+        // ==============================================================================
+        // FIELD
+        // ==============================================================================
+
         private bool disposedValue;
 
         private OpenFileDialog _dialog;
 
-        public FileDialogHelper(string format = "*|*")
+
+        // ==============================================================================
+        // PROPERTY
+        // ==============================================================================
+
+        public bool MultiSelect { get; set; }
+
+        public string? Title { get; set; }
+
+
+        // ==============================================================================
+        // CONSTRUCTOR
+        // ==============================================================================
+
+        public FileDialogHelper(EFilter filter)
         {
             _dialog = new OpenFileDialog()
             {
-                Filter = format
+                Filter = GetFilter(filter),
+                Multiselect = MultiSelect,
+                Title = Title
             };
         }
+
+
+        // ==============================================================================
+        // METHOD
+        // ==============================================================================
 
         public string GetFilePath()
         {
@@ -29,6 +68,35 @@ namespace ToKorean.IO
 
             return string.Empty;
         }
+
+        private string GetFilter(EFilter filter)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if ((filter & EFilter.YML) == EFilter.YML)
+            {
+                sb.Append(".yml|*.yml");
+            }
+
+            if ((filter & EFilter.TXT) == EFilter.TXT)
+            {
+                sb.Append("|.txt(Text Files)|*.txt");
+            }
+
+            if ((filter & EFilter.JSON) == EFilter.JSON)
+            {
+                sb.Append("|.json(Json Files)|*.json");
+            }
+
+            if ((filter & EFilter.ALL) == EFilter.ALL)
+            {
+                sb.Append("|*.*(All Files)|*.*");
+            }
+
+            return sb.ToString();
+        }
+
+        #region DISPOSABLE
 
         protected virtual void Dispose(bool disposing)
         {
@@ -60,5 +128,7 @@ namespace ToKorean.IO
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion
     }
 }

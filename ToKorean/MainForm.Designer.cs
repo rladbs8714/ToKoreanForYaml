@@ -33,10 +33,14 @@
             txtOut = new TextBox();
             splitContainer1 = new SplitContainer();
             flpMain = new FlowLayoutPanel();
+            btnYmlParse = new Button();
             btnTranslate = new Button();
             menuStrip1 = new MenuStrip();
             설정ToolStripMenuItem = new ToolStripMenuItem();
-            btnYmlParse = new Button();
+            btnOrganize = new ToolStripMenuItem();
+            statusStrip1 = new StatusStrip();
+            staTXT = new ToolStripStatusLabel();
+            staLastAction = new ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)scontMain).BeginInit();
             scontMain.Panel1.SuspendLayout();
             scontMain.Panel2.SuspendLayout();
@@ -47,6 +51,7 @@
             splitContainer1.SuspendLayout();
             flpMain.SuspendLayout();
             menuStrip1.SuspendLayout();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // scontMain
@@ -63,7 +68,7 @@
             // scontMain.Panel2
             // 
             scontMain.Panel2.Controls.Add(txtOut);
-            scontMain.Size = new Size(784, 383);
+            scontMain.Size = new Size(784, 361);
             scontMain.SplitterDistance = 392;
             scontMain.TabIndex = 0;
             // 
@@ -73,7 +78,7 @@
             txtOrigin.Location = new Point(0, 0);
             txtOrigin.Multiline = true;
             txtOrigin.Name = "txtOrigin";
-            txtOrigin.Size = new Size(392, 383);
+            txtOrigin.Size = new Size(392, 361);
             txtOrigin.TabIndex = 0;
             // 
             // txtOut
@@ -83,12 +88,12 @@
             txtOut.Multiline = true;
             txtOut.Name = "txtOut";
             txtOut.ReadOnly = true;
-            txtOut.Size = new Size(388, 383);
+            txtOut.Size = new Size(388, 361);
             txtOut.TabIndex = 0;
             // 
             // splitContainer1
             // 
-            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Dock = DockStyle.Top;
             splitContainer1.Location = new Point(0, 24);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = Orientation.Horizontal;
@@ -100,8 +105,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(flpMain);
-            splitContainer1.Size = new Size(784, 437);
-            splitContainer1.SplitterDistance = 383;
+            splitContainer1.Size = new Size(784, 412);
+            splitContainer1.SplitterDistance = 361;
             splitContainer1.TabIndex = 1;
             // 
             // flpMain
@@ -111,8 +116,17 @@
             flpMain.Dock = DockStyle.Fill;
             flpMain.Location = new Point(0, 0);
             flpMain.Name = "flpMain";
-            flpMain.Size = new Size(784, 50);
+            flpMain.Size = new Size(784, 47);
             flpMain.TabIndex = 0;
+            // 
+            // btnYmlParse
+            // 
+            btnYmlParse.Location = new Point(3, 3);
+            btnYmlParse.Name = "btnYmlParse";
+            btnYmlParse.Size = new Size(75, 23);
+            btnYmlParse.TabIndex = 1;
+            btnYmlParse.Text = "Yml Parser";
+            btnYmlParse.UseVisualStyleBackColor = true;
             // 
             // btnTranslate
             // 
@@ -134,24 +148,44 @@
             // 
             // 설정ToolStripMenuItem
             // 
+            설정ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { btnOrganize });
             설정ToolStripMenuItem.Name = "설정ToolStripMenuItem";
-            설정ToolStripMenuItem.Size = new Size(43, 20);
-            설정ToolStripMenuItem.Text = "일반";
+            설정ToolStripMenuItem.Size = new Size(57, 20);
+            설정ToolStripMenuItem.Text = "파일(&F)";
             // 
-            // btnYmlParse
+            // btnOrganize
             // 
-            btnYmlParse.Location = new Point(3, 3);
-            btnYmlParse.Name = "btnYmlParse";
-            btnYmlParse.Size = new Size(75, 23);
-            btnYmlParse.TabIndex = 1;
-            btnYmlParse.Text = "Yml Parser";
-            btnYmlParse.UseVisualStyleBackColor = true;
+            btnOrganize.Name = "btnOrganize";
+            btnOrganize.Size = new Size(139, 22);
+            btnOrganize.Text = "불러오기(&O)";
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { staTXT, staLastAction });
+            statusStrip1.Location = new Point(0, 437);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(784, 24);
+            statusStrip1.TabIndex = 3;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // staTXT
+            // 
+            staTXT.BorderSides = ToolStripStatusLabelBorderSides.Right;
+            staTXT.Name = "staTXT";
+            staTXT.Size = new Size(35, 19);
+            staTXT.Text = "동작";
+            // 
+            // staLastAction
+            // 
+            staLastAction.Name = "staLastAction";
+            staLastAction.Size = new Size(0, 19);
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(784, 461);
+            Controls.Add(statusStrip1);
             Controls.Add(splitContainer1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -170,6 +204,8 @@
             flpMain.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -185,5 +221,9 @@
         private FlowLayoutPanel flpMain;
         private Button btnTranslate;
         private Button btnYmlParse;
+        private ToolStripMenuItem btnOrganize;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel staTXT;
+        private ToolStripStatusLabel staLastAction;
     }
 }

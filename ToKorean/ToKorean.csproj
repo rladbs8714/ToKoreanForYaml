@@ -9,7 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Parser\" />
+    <PackageReference Include="YamlDotNet" Version="15.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Yaml">
+      <HintPath>C:\Users\rladb\Downloads\snapshot\yaml\Code\bin\Release\Yaml.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
