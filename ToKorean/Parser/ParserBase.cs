@@ -42,7 +42,7 @@ namespace ToKorean.Parser
         /// <summary>
         /// 문자열 배열을 받아 파싱한다.
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="lines"></param>
         protected abstract void Parse(string[] lines);
 
     }

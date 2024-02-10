@@ -14,6 +14,13 @@ namespace ToKorean
     {
 
         // ==============================================================================
+        // FIELD
+        // ==============================================================================
+
+        private ParserBase _parser;
+
+
+        // ==============================================================================
         // PROPERTY
         // ==============================================================================
 
@@ -51,7 +58,7 @@ namespace ToKorean
 
         private void YMLParse(object? sender, EventArgs e)
         {
-            YMLParser yp = new YMLParser(txtOrigin.Text);
+            _parser = new YMLParser(txtOrigin.Text);
         }
 
         /// <summary>
@@ -62,10 +69,11 @@ namespace ToKorean
         /// <param name="e">ButtonClick Event</param>
         private async void TranslateToKorean(object? sender, EventArgs e)
         {
-            string kor = await Papago.TranslateToKorean("Hello, Papago World !!");
-            Console.WriteLine(kor);
-
-
+            if (_parser is YMLParser yaml)
+            {
+                string kor = await yaml.ToKorean();
+                txtOut.Text = kor;
+            }
         }
 
         /// <summary>

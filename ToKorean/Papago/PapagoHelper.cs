@@ -74,13 +74,11 @@ namespace ToKorean.Papago
         /// </summary>
         /// <param name="eng">원문</param>
         /// <returns>번역된 한글 문자열</returns>
-        public Task<string> TranslateToKorean(string eng)
+        public async Task<string> TranslateToKorean(string eng)
         {
-            return Task.Run(async () =>
-            {
-                string? json = await PostAsync(new StringContent(PREFIX + eng, Encoding.UTF8, MEDIA_TYPE));
-                return GetTranslatedText(json);
-            });
+            string newLine = PREFIX + eng;
+            string? json = await PostAsync(new StringContent(newLine, Encoding.UTF8, MEDIA_TYPE));
+            return GetTranslatedText(json);
         }
 
         /// <summary>

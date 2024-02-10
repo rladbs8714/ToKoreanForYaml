@@ -68,8 +68,8 @@
             // scontMain.Panel2
             // 
             scontMain.Panel2.Controls.Add(txtOut);
-            scontMain.Size = new Size(784, 361);
-            scontMain.SplitterDistance = 392;
+            scontMain.Size = new Size(805, 403);
+            scontMain.SplitterDistance = 342;
             scontMain.TabIndex = 0;
             // 
             // txtOrigin
@@ -78,7 +78,7 @@
             txtOrigin.Location = new Point(0, 0);
             txtOrigin.Multiline = true;
             txtOrigin.Name = "txtOrigin";
-            txtOrigin.Size = new Size(392, 361);
+            txtOrigin.Size = new Size(342, 403);
             txtOrigin.TabIndex = 0;
             // 
             // txtOut
@@ -88,12 +88,13 @@
             txtOut.Multiline = true;
             txtOut.Name = "txtOut";
             txtOut.ReadOnly = true;
-            txtOut.Size = new Size(388, 361);
+            txtOut.Size = new Size(459, 403);
             txtOut.TabIndex = 0;
             // 
             // splitContainer1
             // 
-            splitContainer1.Dock = DockStyle.Top;
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.IsSplitterFixed = true;
             splitContainer1.Location = new Point(0, 24);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = Orientation.Horizontal;
@@ -105,8 +106,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(flpMain);
-            splitContainer1.Size = new Size(784, 412);
-            splitContainer1.SplitterDistance = 361;
+            splitContainer1.Size = new Size(805, 460);
+            splitContainer1.SplitterDistance = 403;
             splitContainer1.TabIndex = 1;
             // 
             // flpMain
@@ -116,7 +117,7 @@
             flpMain.Dock = DockStyle.Fill;
             flpMain.Location = new Point(0, 0);
             flpMain.Name = "flpMain";
-            flpMain.Size = new Size(784, 47);
+            flpMain.Size = new Size(805, 53);
             flpMain.TabIndex = 0;
             // 
             // btnYmlParse
@@ -142,7 +143,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { 설정ToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(784, 24);
+            menuStrip1.Size = new Size(805, 24);
             menuStrip1.TabIndex = 2;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -155,16 +156,17 @@
             // 
             // btnOrganize
             // 
+            btnOrganize.Enabled = false;
             btnOrganize.Name = "btnOrganize";
-            btnOrganize.Size = new Size(139, 22);
+            btnOrganize.Size = new Size(180, 22);
             btnOrganize.Text = "불러오기(&O)";
             // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { staTXT, staLastAction });
-            statusStrip1.Location = new Point(0, 437);
+            statusStrip1.Location = new Point(0, 460);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(784, 24);
+            statusStrip1.Size = new Size(805, 24);
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -184,7 +186,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(784, 461);
+            ClientSize = new Size(805, 484);
             Controls.Add(statusStrip1);
             Controls.Add(splitContainer1);
             Controls.Add(menuStrip1);

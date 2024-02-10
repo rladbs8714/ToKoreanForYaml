@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using ToKorean.Attribute;
 using ToKorean.Papago;
 using YamlDotNet.Core;
@@ -11,13 +12,14 @@ using IParser = YamlDotNet.Core.IParser;
 namespace ToKorean.Parser
 {
 
-    #region 사용 안하는 주석
     /* ==================================================================================
      * 공식 YAML Parser를 이용하는게 좋을 것 같아 Nuget을 다운받아 사용함.
      * Nuget에서 "YamlDotNet"를 검색하면 나옴.
      * https://yaml-net-parser.sourceforge.net/
+     * 
+     * TODO.
+     * - ToKorean의 내용을 정규표현식으로 구현하기
      * ================================================================================== */
-    #endregion
 
     internal class YMLParser : ParserBase, IYMLTagReplace
     {
@@ -125,10 +127,15 @@ namespace ToKorean.Parser
         /// YML 문자열을 받아 파싱한다.
         /// </summary>
         /// <param name="content">원문 텍스트</param>
-        protected override void Parse(string content)
-        {
-            
-        }
+        [NotUsed]
+        protected override void Parse(string content) { }
+
+        /// <summary>
+        /// 문자열 배열을 받아 파싱한다.
+        /// </summary>
+        /// <param name="lines"></param>
+        [NotUsed]
+        protected override void Parse(string[] lines) { }
 
         /// <summary>
         /// 파싱된 Yaml의 Values를 한글로 번역한다.
@@ -159,13 +166,17 @@ namespace ToKorean.Parser
                     continue;
 
                 if (stylePI.GetValue(node) is ScalarStyle ss &&
-                    ss != ScalarStyle.SingleQuoted)
+                    (ss == ScalarStyle.Literal || ss == ScalarStyle.Plain))
                     continue;
 
+                // ======================================================================
                 // logic
                 // 1. get value ( > english)
-                // 2. to korean
-                // 3. set value ( < korean)
+                // 2 keyword to index
+                // 3. to korean
+                // 4. index to keyword
+                // 5. set value ( < korean)
+                // ======================================================================
 
                 // Get Value
                 string? value = valuePI.GetValue(node) as string;
@@ -173,8 +184,15 @@ namespace ToKorean.Parser
                 if (string.IsNullOrEmpty(value))
                     continue;
 
+                // keyword to index
+                value = KeywordToIndex(value);
+                Console.WriteLine(value);
+
                 // value to korean
                 value = await Papago.TranslateToKorean(value);
+
+                // index to keyword
+                value = IndexToKeyword(value);
 
                 // set value
                 valuePI.SetValue(node, value);
@@ -186,16 +204,13 @@ namespace ToKorean.Parser
             return sw.ToString();
         }
 
-        [NotUsed]
-        protected override void Parse(string[] lines) { }
-
         /// <summary>
         /// 태그 문자열을 번역되지 않게 인덱스로 치환한다.
         /// 치환된 인덱스는 번역이 끝나고 원래 태그로 다시 복원되어야 한다.
         /// </summary>
         /// <param name="text">원문</param>
         /// <returns>실패시 원문 그대로 리턴, 태그가 인덱스로 치환된 문자열.</returns>
-        public string Tag2Index(string text)
+        private string KeywordToIndex(string text)
         {
             // Tags 초기화
             Tags = new Dictionary<string, string>();
@@ -207,29 +222,80 @@ namespace ToKorean.Parser
                 // &- 치환
                 if (text[i] == '&')
                 {
-                    Tags.Add(TagText, text.Substring(i, 2));                // 키와 값을 먼저 저장 하고
-                    text = text.Replace(text.Substring(i, 2), TagText);     // 치환
+                    Regex regex = new Regex(@"[0-9a-z]");
+                    if (regex.IsMatch(text[i + 1].ToString()))
+                    {
+                        // '&'뒤에 문자가 하나 더 있을 때
+
+                        string index = TagText;
+                        Tags.Add(index, text.Substring(i, 2));                // 키와 값을 먼저 저장 하고
+                        text = text.Replace(text.Substring(i, 2), index);     // 치환
+                    }
+                    else
+                    {
+                        // '&'뒤에 문자가 없을 때
+
+                        string keyword = text.Substring(i, 1);
+                        string index = TagText;
+                        Tags.Add(index, keyword);                // 키와 값을 먼저 저장 하고
+                        text = text.Replace(keyword, index);     // 치환
+                    }
                 }
 
                 // #...# 치환
                 if (text[i] == '#')
                 {
-                    int sta = i;
-                    while (text[--i] != '#' && i < text.Length) ;
-                    
-                    if (i >= text.Length)
-                    {
-                        // '#'가 하나밖에 없음. (태그가 잘못됨)
-                        // 로그 적어야 함.
-                        Console.WriteLine("태그가 잘못 입력되어있습니다.");
-                        return back;
-                    }
+                    string keyword         = text.Substring(i, 7);
+                    string keywordEndSharp = text.Substring(i, 8);
 
-                    Tags.Add(TagText, text.Substring(sta, i - sta + 1));                // 키와 값을 먼저 저장하고
-                    text = text.Replace(text.Substring(sta, i - sta + 1), TagText);     // 치환
+                    Regex regex = new Regex(@"#?[0-9A-Z]{6}");
+                    Regex regexEndSharp = new Regex(@"#?[0-9A-Z]{6}#");
+                    if (regex.IsMatch(keyword))
+                    {
+                        string index = TagText;
+                        Tags.Add(index, keyword);
+                        text = text.Replace(keyword, index);
+                    }
+                    else if(regexEndSharp.IsMatch(keywordEndSharp))
+                    {
+                        string index = TagText;
+                        Tags.Add(index, keywordEndSharp);
+                        text = text.Replace(keywordEndSharp, index);
+                    }
+                    else
+                    {
+                        // Exception
+                        Console.WriteLine("잘못된 텍스트");
+                    }
                 }
 
-                i += 1;
+                // [...] 치환
+                if (text[i] == ']')
+                {
+                    try
+                    {
+                        text = ReplaceRangeWithKeyword(text, ref i, '[');
+                    }
+                    catch
+                    {
+                        return back;
+                    }
+                }
+
+                // {...} 치환
+                if (text[i] == '}')
+                {
+                    try
+                    {
+                        text = ReplaceRangeWithKeyword(text, ref i, '{');
+                    }
+                    catch
+                    {
+                        return back;
+                    }
+                }
+
+                i -= 1;
             }
 
             return text;
@@ -240,9 +306,42 @@ namespace ToKorean.Parser
         /// </summary>
         /// <param name="text">번역된 문자열</param>
         /// <returns>인덱스가 태그로 치환된 문자열</returns>
-        public string Index2Tag(string text)
+        private string IndexToKeyword(string text)
         {
-            return "";
+            foreach (KeyValuePair<string, string> kvp in Tags)
+            {
+                text = text.Replace(kvp.Key, kvp.Value);
+            }
+
+            return text;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="curIdx"></param>
+        /// <param name="find"></param>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        /// <returns></returns>
+        private string ReplaceRangeWithKeyword(string text, ref int curIdx, char find)
+        {
+            int sta = curIdx;
+
+            try
+            {
+                while (text[--curIdx] != find) ;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw;
+            }
+
+            // string keyword = text.Substring(sta, curIdx - sta + 1);
+            string keyword = text.Substring(curIdx, sta - curIdx + 1);
+            string index = TagText;
+            Tags.Add(index, keyword);                // 키와 값을 먼저 저장하고
+            return text.Replace(keyword, index);     // 치환
         }
     }
 }
