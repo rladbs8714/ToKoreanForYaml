@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using ToKorean.Attribute;
 using ToKorean.Papago;
+using YamlDotNet.Core;
+using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using IParser = YamlDotNet.Core.IParser;
 
+#pragma warning disable CS8618 // 생성자를 종료할 때 null을 허용하지 않는 필드에 null이 아닌 값을 포함해야 합니다. null 허용으로 선언해 보세요.
 namespace ToKorean.Parser
 {
 
@@ -47,6 +50,16 @@ namespace ToKorean.Parser
 
 
         // ==============================================================================
+        // FIELD
+        // ==============================================================================
+
+        /// <summary>
+        /// Yaml Stream
+        /// </summary>
+        private readonly YamlStream _stream;
+
+
+        // ==============================================================================
         // PROPERTY
         // ==============================================================================
 
@@ -59,6 +72,16 @@ namespace ToKorean.Parser
         /// 현재 Tags의 아이템 개수로 태그를 생성한다.
         /// </summary>
         public string TagText { get { return $"{{{Tags.Count}}}"; } }
+
+        /// <summary>
+        /// 매핑된 Yaml Node
+        /// </summary>
+        public YamlMappingNode Mapping { get; private set; }
+
+        /// <summary>
+        /// Papago Helper
+        /// </summary>
+        private IPapagoHelper Papago { get { return PapagoHelper.Instance; } }
 
 
         // ==============================================================================
@@ -73,7 +96,12 @@ namespace ToKorean.Parser
         /// <param name="content">raw yml</param>
         public YMLParser(string content) : base()
         {
-            Parse(content);
+            // Setup the input
+            StringReader input = new StringReader(content);
+
+            // Load the stream
+            _stream = new YamlStream();
+            _stream.Load(input);
         }
 
         /// <summary>
@@ -99,7 +127,63 @@ namespace ToKorean.Parser
         /// <param name="content">원문 텍스트</param>
         protected override void Parse(string content)
         {
+            
+        }
 
+        /// <summary>
+        /// 파싱된 Yaml의 Values를 한글로 번역한다.
+        /// 이때 특정 키워드는 무시한다.
+        /// </summary>
+        /// <returns>한글로 번역된 Yaml</returns>
+        public async Task<string> ToKorean()
+        {
+            // Cast Exception Check
+            YamlMappingNode mapping =
+                (YamlMappingNode)_stream.Documents[0].RootNode;
+
+            foreach (YamlNode node in mapping.AllNodes)
+            {
+                if (node == null)
+                    continue;
+
+                // node가 명백히 'Key'일 때, Pass
+                if (node is YamlMappingNode m)
+                {
+                    continue;
+                }
+
+                PropertyInfo? valuePI = node.GetType().GetProperty("Value");
+                PropertyInfo? stylePI = node.GetType().GetProperty("Style");
+
+                if (stylePI == null || valuePI == null)
+                    continue;
+
+                if (stylePI.GetValue(node) is ScalarStyle ss &&
+                    ss != ScalarStyle.SingleQuoted)
+                    continue;
+
+                // logic
+                // 1. get value ( > english)
+                // 2. to korean
+                // 3. set value ( < korean)
+
+                // Get Value
+                string? value = valuePI.GetValue(node) as string;
+
+                if (string.IsNullOrEmpty(value))
+                    continue;
+
+                // value to korean
+                value = await Papago.TranslateToKorean(value);
+
+                // set value
+                valuePI.SetValue(node, value);
+            }
+
+            StringWriter sw = new StringWriter();
+            _stream.Save(sw);
+
+            return sw.ToString();
         }
 
         [NotUsed]
@@ -162,3 +246,4 @@ namespace ToKorean.Parser
         }
     }
 }
+#pragma warning restore CS8618 // 생성자를 종료할 때 null을 허용하지 않는 필드에 null이 아닌 값을 포함해야 합니다. null 허용으로 선언해 보세요.
