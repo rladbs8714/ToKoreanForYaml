@@ -1,4 +1,4 @@
-﻿namespace ToKorean.Http
+﻿namespace Translate.Http
 {
     internal interface IHttpHelper
     {

@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using YamlDotNet.Core.Tokens;
 
 namespace ToKorean.Parser
 {
     internal abstract class ParserBase
     {
+
+        // ==============================================================================
+        // FIELD
+        // ==============================================================================
+
+        public event EventHandler<string> LastActionEvent;
+
+        public event EventHandler<int> PerformStepEvent;
 
         // ==============================================================================
         // PROPERTY
@@ -17,6 +21,10 @@ namespace ToKorean.Parser
         /// Key와 Value를 저장하는 딕셔너리
         /// </summary>
         public Dictionary<object, object> Data { get; protected set; }
+        /// <summary>
+        /// 파싱된 데이터 개수
+        /// </summary>
+        public int Count { get; protected set; }
 
 
         // ==============================================================================
@@ -45,5 +53,16 @@ namespace ToKorean.Parser
         /// <param name="lines"></param>
         protected abstract void Parse(string[] lines);
 
+        protected void OnLastActionEvent(object sender, string message)
+        {
+            // Last Log
+            LastActionEvent?.Invoke(sender, message);
+        }
+
+        protected void OnPerformStep(object sender, int step)
+        {
+            // Progress Bar Step
+            PerformStepEvent?.Invoke(sender, step);
+        }
     }
 }

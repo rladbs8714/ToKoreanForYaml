@@ -1,4 +1,4 @@
-﻿namespace ToKorean.Papago
+﻿namespace ToKorean.Parser
 {
     internal interface IYMLTagReplace
     {

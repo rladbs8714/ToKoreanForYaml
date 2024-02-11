@@ -1,11 +1,11 @@
-﻿using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using ToKorean.Http;
+using ToKorean.Parser;
 
-namespace ToKorean.Papago
+namespace ToKorean.Translater.Papago
 {
-    internal class PapagoHelper : HttpHelper, IPapagoHelper
+    internal class PapagoHelper : HttpHelper, ITranslateHelper
     {
 
         #region SINGLETON
@@ -36,32 +36,55 @@ namespace ToKorean.Papago
         /// <summary>
         /// Papago URL
         /// </summary>
-        private const string URL = "https://openapi.naver.com/v1/papago/n2mt";
+        private readonly string URL;
         /// <summary>
         /// Naver Client ID
         /// </summary>
-        private const string CLIENT_ID = "wcSQ77zvL3kGmdXbtdUU";
+        private readonly string CLIENT_ID;
         /// <summary>
         /// Naver Client Secret
         /// </summary>
-        private const string CLIENT_SECRET = "cfVFHZIlTQ";
+        private readonly string CLIENT_SECRET;
         /// <summary>
         /// 번역할 텍스트 접두사
         /// </summary>
-        private const string PREFIX = "source=en&target=ko&text=";
+        private readonly string PREFIX;
         /// <summary>
         /// MediaType
         /// </summary>
-        private const string MEDIA_TYPE = "application/x-www-form-urlencoded";
+        private readonly string MEDIA_TYPE;
+        /// <summary>
+        /// Header ID
+        /// </summary>
+        private readonly string HEADER_ID;
+        /// <summary>
+        /// Header Secret
+        /// </summary>
+        private readonly string HEADER_SECRET;
 
 
         // ==============================================================================
         // CONSTRUCTOR
         // ==============================================================================
 
-        private PapagoHelper() : base(URL, CLIENT_ID, CLIENT_SECRET)
+        private PapagoHelper() : base()
         {
+            IniHelper iniHelper = new IniHelper();
 
+            URL = iniHelper.Read("url");
+            CLIENT_ID = iniHelper.Read("client_id");
+            CLIENT_SECRET = iniHelper.Read("client_secret");
+            PREFIX = iniHelper.Read("prefix");
+            MEDIA_TYPE = iniHelper.Read("media_type");
+            HEADER_ID = iniHelper.Read("header_id");
+            HEADER_SECRET = iniHelper.Read("header_secret");
+
+            Client.BaseAddress = new Uri(URL);
+
+            Client.DefaultRequestHeaders.Accept.Clear();
+
+            Client.DefaultRequestHeaders.Add(HEADER_ID, CLIENT_ID);
+            Client.DefaultRequestHeaders.Add(HEADER_SECRET, CLIENT_SECRET);
         }
 
 
@@ -70,6 +93,7 @@ namespace ToKorean.Papago
         // ==============================================================================
 
         /// <summary>
+        /// Override.
         /// 원문을 받아 한글로 번역한 문자열을 리턴한다.
         /// </summary>
         /// <param name="eng">원문</param>
@@ -82,6 +106,7 @@ namespace ToKorean.Papago
         }
 
         /// <summary>
+        /// Override.
         /// 원문 리스트를 받아 한글로 번역한 문자열을 리턴한다.
         /// </summary>
         /// <param name="engs">원문 리스트</param>
@@ -123,12 +148,10 @@ namespace ToKorean.Papago
                 return string.Empty;
             }
 
-            if (vo == null)
+            if (vo == null || vo.message == null || vo.message.result == null)
                 return string.Empty;
 
             return vo.message.result.translatedText;
         }
-
-
     }
 }

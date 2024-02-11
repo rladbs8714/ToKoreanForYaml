@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using ToKorean.Attribute;
-using ToKorean.Papago;
+using ToKorean.Translater;
+using ToKorean.Translater.DeepL;
+using ToKorean.Translater.Papago;
+using Yaml;
 using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
-using IParser = YamlDotNet.Core.IParser;
 
 #pragma warning disable CS8618 // 생성자를 종료할 때 null을 허용하지 않는 필드에 null이 아닌 값을 포함해야 합니다. null 허용으로 선언해 보세요.
 namespace ToKorean.Parser
@@ -24,30 +24,10 @@ namespace ToKorean.Parser
     internal class YMLParser : ParserBase, IYMLTagReplace
     {
 
-        // ==============================================================================
-        // INNER CLASS
-        // ==============================================================================
-
-        [NotUsed]
-        public class ValidatingNodeDeserializer : INodeDeserializer
+        public enum ETranslateAPI
         {
-            private readonly INodeDeserializer _nodeDeserializer;
-
-            public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
-                => _nodeDeserializer = nodeDeserializer;
-
-            public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
-            {
-                if (_nodeDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value))
-                {
-                    var context = new ValidationContext(value, null, null);
-                    Validator.ValidateObject(value, context, true);
-                    
-                    return true;
-                }
-
-                return false;
-            }
+            Papago,
+            DeepL
         }
 
 
@@ -59,6 +39,14 @@ namespace ToKorean.Parser
         /// Yaml Stream
         /// </summary>
         private readonly YamlStream _stream;
+        /// <summary>
+        /// Translate API
+        /// </summary>
+        private readonly ETranslateAPI _translateAPI;
+        /// <summary>
+        /// Papago Helper
+        /// </summary>
+        private ITranslateHelper _translate;
 
 
         // ==============================================================================
@@ -80,11 +68,6 @@ namespace ToKorean.Parser
         /// </summary>
         public YamlMappingNode Mapping { get; private set; }
 
-        /// <summary>
-        /// Papago Helper
-        /// </summary>
-        private IPapagoHelper Papago { get { return PapagoHelper.Instance; } }
-
 
         // ==============================================================================
         // CONSTRUCTOR
@@ -96,14 +79,37 @@ namespace ToKorean.Parser
         /// yml 콘텐츠를 받아 파싱한 후 데이터를 저장한다.
         /// </summary>
         /// <param name="content">raw yml</param>
-        public YMLParser(string content) : base()
+        /// <exception cref="InvalidCastException"></exception>
+        public YMLParser(string content, ETranslateAPI translateAPI) : base()
         {
+            switch (translateAPI)
+            {
+                case ETranslateAPI.Papago:
+                    _translate = PapagoHelper.Instance;
+                    break;
+                case ETranslateAPI.DeepL:
+                    _translate = DeepLHelper.Instance;
+                    break;
+            }
+
+            _translateAPI = translateAPI;
+
             // Setup the input
             StringReader input = new StringReader(content);
 
             // Load the stream
             _stream = new YamlStream();
             _stream.Load(input);
+
+            try
+            {
+                Mapping = (YamlMappingNode)_stream.Documents[0].RootNode;
+            }
+            catch (InvalidCastException)
+            {
+                throw;
+            }
+            Count = Mapping.AllNodes.Count();
         }
 
         /// <summary>
@@ -144,12 +150,10 @@ namespace ToKorean.Parser
         /// <returns>한글로 번역된 Yaml</returns>
         public async Task<string> ToKorean()
         {
-            // Cast Exception Check
-            YamlMappingNode mapping =
-                (YamlMappingNode)_stream.Documents[0].RootNode;
-
-            foreach (YamlNode node in mapping.AllNodes)
+            foreach (YamlNode node in Mapping.AllNodes)
             {
+                OnPerformStep(this, 1);
+
                 if (node == null)
                     continue;
 
@@ -186,16 +190,17 @@ namespace ToKorean.Parser
 
                 // keyword to index
                 value = KeywordToIndex(value);
-                Console.WriteLine(value);
 
                 // value to korean
-                value = await Papago.TranslateToKorean(value);
+                value = await _translate.TranslateToKorean(value);
 
                 // index to keyword
                 value = IndexToKeyword(value);
 
                 // set value
                 valuePI.SetValue(node, value);
+
+                OnLastActionEvent(this, value);
             }
 
             StringWriter sw = new StringWriter();

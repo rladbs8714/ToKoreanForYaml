@@ -1,16 +1,13 @@
-using System.Reflection.Metadata;
 using System.Text;
 using ToKorean.IO;
-using ToKorean.Papago;
 using ToKorean.Parser;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
-using YamlDotNet.Helpers;
+using ToKorean.Translater;
+using ToKorean.Translater.DeepL;
+using ToKorean.Translater.Papago;
 
 namespace ToKorean
 {
-    public partial class MainForm : Form, ILastActionEvent
+    public partial class MainForm : Form
     {
 
         // ==============================================================================
@@ -27,7 +24,7 @@ namespace ToKorean
         /// <summary>
         /// 파파고 API를 사용한 번역 도우미
         /// </summary>
-        private IPapagoHelper Papago { get { return PapagoHelper.Instance; } }
+        private ITranslateHelper Papago { get { return PapagoHelper.Instance; } }
 
 
         // ==============================================================================
@@ -39,9 +36,12 @@ namespace ToKorean
             InitializeComponent();
 
             // Event
-            btnTranslate.Click += TranslateToKorean;
             btnOrganize.Click += OpenFileDialog;
-            btnYmlParse.Click += YMLParse;
+            btnPapagoTranslate.Click += TranslateToKorean;
+            btnDeepLTranslate.Click += TranslateToKorean;
+
+            btnPapagoTranslate.Tag = YMLParser.ETranslateAPI.Papago;
+            btnDeepLTranslate.Tag = YMLParser.ETranslateAPI.DeepL;
         }
 
 
@@ -49,17 +49,12 @@ namespace ToKorean
         // EVENT
         // ==============================================================================
 
-        public event EventHandler<EventArgs> LastActionEvent;
+        public event EventHandler<string> LastActionEvent;
 
 
         // ==============================================================================
         // EVENT METHOD
         // ==============================================================================
-
-        private void YMLParse(object? sender, EventArgs e)
-        {
-            _parser = new YMLParser(txtOrigin.Text);
-        }
 
         /// <summary>
         /// btnTranslate Button Event.
@@ -69,11 +64,38 @@ namespace ToKorean
         /// <param name="e">ButtonClick Event</param>
         private async void TranslateToKorean(object? sender, EventArgs e)
         {
+            if (sender == null)
+                return;
+
+            if (((Control)sender).Tag is not YMLParser.ETranslateAPI translateAPI)
+                return;
+
+            try
+            {
+                _parser = new YMLParser(txtOrigin.Text, translateAPI);
+            }
+            catch (InvalidCastException)
+            {
+                staProgBar.Maximum = 1;
+                staProgBar.Value = 1;
+
+                staLastAction.Text = "YAML 형식이 잘못되었습니다. 내용을 다시 확인하세요.";
+                return;
+            }
+
+            _parser.LastActionEvent += OnLastAction;
+            _parser.PerformStepEvent += OnPerformStep;
+
+            staProgBar.Maximum = _parser.Count;
+            staProgBar.Value = 0;
+
             if (_parser is YMLParser yaml)
             {
                 string kor = await yaml.ToKorean();
                 txtOut.Text = kor;
             }
+
+            staLastAction.Text = "완료.";
         }
 
         /// <summary>
@@ -111,6 +133,22 @@ namespace ToKorean
             }
 
             txtOrigin.Text = sb.ToString();
+        }
+
+        /// <summary>
+        /// Last Action 이벤트
+        /// </summary>
+        /// <param name="sender">sender</param>
+        /// <param name="message">Last Action Message</param>
+        private void OnLastAction(object? sender, string message)
+        {
+            staLastAction.Text = message;
+        }
+
+        private void OnPerformStep(object? sender, int step)
+        {
+            staProgBar.Step = step;
+            staProgBar.PerformStep();
         }
     }
 }

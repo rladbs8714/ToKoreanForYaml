@@ -33,14 +33,15 @@
             txtOut = new TextBox();
             splitContainer1 = new SplitContainer();
             flpMain = new FlowLayoutPanel();
-            btnYmlParse = new Button();
-            btnTranslate = new Button();
+            btnPapagoTranslate = new Button();
+            btnDeepLTranslate = new Button();
             menuStrip1 = new MenuStrip();
             설정ToolStripMenuItem = new ToolStripMenuItem();
             btnOrganize = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             staTXT = new ToolStripStatusLabel();
             staLastAction = new ToolStripStatusLabel();
+            staProgBar = new ToolStripProgressBar();
             ((System.ComponentModel.ISupportInitialize)scontMain).BeginInit();
             scontMain.Panel1.SuspendLayout();
             scontMain.Panel2.SuspendLayout();
@@ -87,7 +88,6 @@
             txtOut.Location = new Point(0, 0);
             txtOut.Multiline = true;
             txtOut.Name = "txtOut";
-            txtOut.ReadOnly = true;
             txtOut.Size = new Size(459, 403);
             txtOut.TabIndex = 0;
             // 
@@ -112,31 +112,31 @@
             // 
             // flpMain
             // 
-            flpMain.Controls.Add(btnYmlParse);
-            flpMain.Controls.Add(btnTranslate);
+            flpMain.Controls.Add(btnPapagoTranslate);
+            flpMain.Controls.Add(btnDeepLTranslate);
             flpMain.Dock = DockStyle.Fill;
             flpMain.Location = new Point(0, 0);
             flpMain.Name = "flpMain";
             flpMain.Size = new Size(805, 53);
             flpMain.TabIndex = 0;
             // 
-            // btnYmlParse
+            // btnPapagoTranslate
             // 
-            btnYmlParse.Location = new Point(3, 3);
-            btnYmlParse.Name = "btnYmlParse";
-            btnYmlParse.Size = new Size(75, 23);
-            btnYmlParse.TabIndex = 1;
-            btnYmlParse.Text = "Yml Parser";
-            btnYmlParse.UseVisualStyleBackColor = true;
+            btnPapagoTranslate.Location = new Point(3, 3);
+            btnPapagoTranslate.Name = "btnPapagoTranslate";
+            btnPapagoTranslate.Size = new Size(75, 23);
+            btnPapagoTranslate.TabIndex = 0;
+            btnPapagoTranslate.Text = "Papago";
+            btnPapagoTranslate.UseVisualStyleBackColor = true;
             // 
-            // btnTranslate
+            // btnDeepLTranslate
             // 
-            btnTranslate.Location = new Point(84, 3);
-            btnTranslate.Name = "btnTranslate";
-            btnTranslate.Size = new Size(75, 23);
-            btnTranslate.TabIndex = 0;
-            btnTranslate.Text = "번역";
-            btnTranslate.UseVisualStyleBackColor = true;
+            btnDeepLTranslate.Location = new Point(84, 3);
+            btnDeepLTranslate.Name = "btnDeepLTranslate";
+            btnDeepLTranslate.Size = new Size(75, 23);
+            btnDeepLTranslate.TabIndex = 1;
+            btnDeepLTranslate.Text = "DeepL";
+            btnDeepLTranslate.UseVisualStyleBackColor = true;
             // 
             // menuStrip1
             // 
@@ -158,12 +158,12 @@
             // 
             btnOrganize.Enabled = false;
             btnOrganize.Name = "btnOrganize";
-            btnOrganize.Size = new Size(180, 22);
+            btnOrganize.Size = new Size(139, 22);
             btnOrganize.Text = "불러오기(&O)";
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { staTXT, staLastAction });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { staTXT, staProgBar, staLastAction });
             statusStrip1.Location = new Point(0, 460);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(805, 24);
@@ -181,6 +181,12 @@
             // 
             staLastAction.Name = "staLastAction";
             staLastAction.Size = new Size(0, 19);
+            // 
+            // staProgBar
+            // 
+            staProgBar.Name = "staProgBar";
+            staProgBar.Size = new Size(100, 18);
+            staProgBar.Step = 1;
             // 
             // MainForm
             // 
@@ -221,11 +227,12 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem 설정ToolStripMenuItem;
         private FlowLayoutPanel flpMain;
-        private Button btnTranslate;
-        private Button btnYmlParse;
+        private Button btnPapagoTranslate;
+        private Button btnDeepLTranslate;
         private ToolStripMenuItem btnOrganize;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel staTXT;
         private ToolStripStatusLabel staLastAction;
+        private ToolStripProgressBar staProgBar;
     }
 }
