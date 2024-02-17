@@ -1,6 +1,6 @@
-﻿namespace ToKorean.Translater
+﻿namespace Translater
 {
-    internal interface ITranslateHelper
+    public interface ITranslateHelper
     {
         Task<string> TranslateToKorean(string eng);
 

@@ -1,23 +1,22 @@
 ﻿using System.Text;
 using System.Text.Json;
-using ToKorean.Http;
-using ToKorean.Parser;
+using IO;
+using Web.Http;
 
-namespace ToKorean.Translater.Papago
+namespace Translater.DeepL
 {
-    internal class PapagoHelper : HttpHelper, ITranslateHelper
+    public class DeepLHelper : HttpHelper, ITranslateHelper
     {
 
         #region SINGLETON
 
-        private static PapagoHelper? _instance;
+        private static DeepLHelper _instance;
 
-        public static PapagoHelper Instance
+        public static DeepLHelper Instance
         {
             get
             {
-                if (_instance == null)
-                    _instance = new PapagoHelper();
+                _instance ??= new DeepLHelper();
                 return _instance;
             }
             set
@@ -34,57 +33,46 @@ namespace ToKorean.Translater.Papago
         // ==============================================================================
 
         /// <summary>
+        /// default section
+        /// </summary>
+        private const string SECTION = "DEEPL";
+
+        /// <summary>
         /// Papago URL
         /// </summary>
         private readonly string URL;
         /// <summary>
         /// Naver Client ID
         /// </summary>
-        private readonly string CLIENT_ID;
-        /// <summary>
-        /// Naver Client Secret
-        /// </summary>
-        private readonly string CLIENT_SECRET;
-        /// <summary>
-        /// 번역할 텍스트 접두사
-        /// </summary>
-        private readonly string PREFIX;
+        private readonly string AUTH_KEY;
         /// <summary>
         /// MediaType
         /// </summary>
         private readonly string MEDIA_TYPE;
         /// <summary>
-        /// Header ID
-        /// </summary>
-        private readonly string HEADER_ID;
-        /// <summary>
         /// Header Secret
         /// </summary>
-        private readonly string HEADER_SECRET;
+        private readonly string HEADER_AUTH;
 
 
         // ==============================================================================
         // CONSTRUCTOR
         // ==============================================================================
 
-        private PapagoHelper() : base()
+        private DeepLHelper() : base()
         {
             IniHelper iniHelper = new IniHelper();
 
-            URL = iniHelper.Read("url");
-            CLIENT_ID = iniHelper.Read("client_id");
-            CLIENT_SECRET = iniHelper.Read("client_secret");
-            PREFIX = iniHelper.Read("prefix");
-            MEDIA_TYPE = iniHelper.Read("media_type");
-            HEADER_ID = iniHelper.Read("header_id");
-            HEADER_SECRET = iniHelper.Read("header_secret");
+            URL = iniHelper.Read("url", SECTION);
+            AUTH_KEY = iniHelper.Read("auth_key", SECTION);
+            MEDIA_TYPE = iniHelper.Read("media_type", SECTION);
+            HEADER_AUTH = iniHelper.Read("header_auth", SECTION);
 
             Client.BaseAddress = new Uri(URL);
 
             Client.DefaultRequestHeaders.Accept.Clear();
 
-            Client.DefaultRequestHeaders.Add(HEADER_ID, CLIENT_ID);
-            Client.DefaultRequestHeaders.Add(HEADER_SECRET, CLIENT_SECRET);
+            Client.DefaultRequestHeaders.Add(HEADER_AUTH, $"DeepL-Auth-Key {AUTH_KEY}");
         }
 
 
@@ -100,8 +88,14 @@ namespace ToKorean.Translater.Papago
         /// <returns>번역된 한글 문자열</returns>
         public async Task<string> TranslateToKorean(string eng)
         {
-            string newLine = PREFIX + eng;
-            string? json = await PostAsync(new StringContent(newLine, Encoding.UTF8, MEDIA_TYPE));
+            string[] contentList =
+            {
+                $"text={Uri.EscapeDataString(eng)}",
+                $"source_lang={Uri.EscapeDataString("EN")}",
+                $"target_lang={Uri.EscapeDataString("KO")}"
+            };
+
+            string? json = await PostAsync(new StringContent(string.Join('&', contentList), Encoding.UTF8, MEDIA_TYPE));
             return GetTranslatedText(json);
         }
 
@@ -113,17 +107,7 @@ namespace ToKorean.Translater.Papago
         /// <returns>번역된 한글 문자열 리스트. 새로운 배열이 생성된다.</returns>
         public Task<string[]> TranslateToKorean(string[] engs)
         {
-            return Task.Run(async () =>
-            {
-                string[] kors = new string[engs.Length];
-
-                for (int i = 0; i < engs.Length; i++)
-                {
-                    kors[i] = await TranslateToKorean(engs[i]);
-                }
-
-                return kors;
-            });
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -131,16 +115,16 @@ namespace ToKorean.Translater.Papago
         /// </summary>
         /// <param name="json">응답받은 Json</param>
         /// <returns>번역된 문자열</returns>
-        private string GetTranslatedText(string? json)
+        private string GetTranslatedText(string json)
         {
             if (string.IsNullOrEmpty(json))
                 return string.Empty;
 
-            Papago_VO? vo;
+            DeepL_VO? vo;
 
             try
             {
-                vo = JsonSerializer.Deserialize<Papago_VO>(json);
+                vo = JsonSerializer.Deserialize<DeepL_VO>(json);
             }
             catch (Exception e)
             {
@@ -148,10 +132,10 @@ namespace ToKorean.Translater.Papago
                 return string.Empty;
             }
 
-            if (vo == null || vo.message == null || vo.message.result == null)
+            if (vo == null)
                 return string.Empty;
 
-            return vo.message.result.translatedText;
+            return vo.translations[0].text;
         }
     }
 }

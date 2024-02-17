@@ -40,8 +40,8 @@
             btnOrganize = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             staTXT = new ToolStripStatusLabel();
-            staLastAction = new ToolStripStatusLabel();
             staProgBar = new ToolStripProgressBar();
+            staLastAction = new ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)scontMain).BeginInit();
             scontMain.Panel1.SuspendLayout();
             scontMain.Panel2.SuspendLayout();
@@ -79,6 +79,7 @@
             txtOrigin.Location = new Point(0, 0);
             txtOrigin.Multiline = true;
             txtOrigin.Name = "txtOrigin";
+            txtOrigin.ScrollBars = ScrollBars.Vertical;
             txtOrigin.Size = new Size(342, 403);
             txtOrigin.TabIndex = 0;
             // 
@@ -88,6 +89,7 @@
             txtOut.Location = new Point(0, 0);
             txtOut.Multiline = true;
             txtOut.Name = "txtOut";
+            txtOut.ScrollBars = ScrollBars.Vertical;
             txtOut.Size = new Size(459, 403);
             txtOut.TabIndex = 0;
             // 
@@ -156,7 +158,6 @@
             // 
             // btnOrganize
             // 
-            btnOrganize.Enabled = false;
             btnOrganize.Name = "btnOrganize";
             btnOrganize.Size = new Size(139, 22);
             btnOrganize.Text = "불러오기(&O)";
@@ -177,16 +178,16 @@
             staTXT.Size = new Size(35, 19);
             staTXT.Text = "동작";
             // 
-            // staLastAction
-            // 
-            staLastAction.Name = "staLastAction";
-            staLastAction.Size = new Size(0, 19);
-            // 
             // staProgBar
             // 
             staProgBar.Name = "staProgBar";
             staProgBar.Size = new Size(100, 18);
             staProgBar.Step = 1;
+            // 
+            // staLastAction
+            // 
+            staLastAction.Name = "staLastAction";
+            staLastAction.Size = new Size(0, 19);
             // 
             // MainForm
             // 

@@ -1,6 +1,4 @@
-﻿using YamlDotNet.Core.Tokens;
-
-namespace ToKorean.Parser
+﻿namespace ToKorean.Parser
 {
     internal abstract class ParserBase
     {
@@ -9,9 +7,9 @@ namespace ToKorean.Parser
         // FIELD
         // ==============================================================================
 
-        public event EventHandler<string> LastActionEvent;
+        public event EventHandler<string>? LastActionEvent;
 
-        public event EventHandler<int> PerformStepEvent;
+        public event EventHandler<int>? PerformStepEvent;
 
         // ==============================================================================
         // PROPERTY

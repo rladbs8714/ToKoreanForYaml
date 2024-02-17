@@ -1,9 +1,6 @@
-using System.Text;
 using ToKorean.IO;
 using ToKorean.Parser;
-using ToKorean.Translater;
-using ToKorean.Translater.DeepL;
-using ToKorean.Translater.Papago;
+using IO;
 
 namespace ToKorean
 {
@@ -14,17 +11,11 @@ namespace ToKorean
         // FIELD
         // ==============================================================================
 
-        private ParserBase _parser;
+        private const string ACT = "MainForm";
 
+        private ILogManager Log { get { return LogManager.Instance; } }
 
-        // ==============================================================================
-        // PROPERTY
-        // ==============================================================================
-
-        /// <summary>
-        /// 파파고 API를 사용한 번역 도우미
-        /// </summary>
-        private ITranslateHelper Papago { get { return PapagoHelper.Instance; } }
+        private ParserBase? _parser;
 
 
         // ==============================================================================
@@ -46,13 +37,6 @@ namespace ToKorean
 
 
         // ==============================================================================
-        // EVENT
-        // ==============================================================================
-
-        public event EventHandler<string> LastActionEvent;
-
-
-        // ==============================================================================
         // EVENT METHOD
         // ==============================================================================
 
@@ -70,6 +54,9 @@ namespace ToKorean
             if (((Control)sender).Tag is not YMLParser.ETranslateAPI translateAPI)
                 return;
 
+            string doc = "TranslateToKorean";
+            Log.Logging(ACT, doc, "sta > Translate");
+
             try
             {
                 _parser = new YMLParser(txtOrigin.Text, translateAPI);
@@ -80,6 +67,13 @@ namespace ToKorean
                 staProgBar.Value = 1;
 
                 staLastAction.Text = "YAML 형식이 잘못되었습니다. 내용을 다시 확인하세요.";
+                Log.Logging(ACT, doc, "err > YAML format error. (solution: Please check the format of the yaml you entered.)");
+                return;
+            }
+            catch (Exception ex)
+            {
+                staLastAction.Text = "Unknown exception.";
+                Log.Logging(ACT, "YMLParser", "Unknown exception. (" + ex.Message + ")\r\n" + e.ToString());
                 return;
             }
 
@@ -95,7 +89,9 @@ namespace ToKorean
                 txtOut.Text = kor;
             }
 
+            // Complete
             staLastAction.Text = "완료.";
+            Log.Logging(ACT, doc, "end < Translate");
         }
 
         /// <summary>
@@ -109,6 +105,9 @@ namespace ToKorean
                 FileDialogHelper.EFilter.YML |
                 FileDialogHelper.EFilter.ALL;
 
+            string doc = "OpenFileDialog";
+            Log.Logging(ACT, doc, "sta >");
+
             using FileDialogHelper fh = new FileDialogHelper(filter)
             {
                 MultiSelect = false,
@@ -120,19 +119,14 @@ namespace ToKorean
             if (string.IsNullOrEmpty(ymlPath) ||
                 !File.Exists(ymlPath))
             {
-                Console.WriteLine("파일을 찾을 수 없습니다.");
+                staLastAction.Text = "파일을 찾을 수 없습니다.";
+                Log.Logging(ACT, doc, $"err > not found file. ({ymlPath})");
                 return;
             }
+            Log.Logging(ACT, doc, $"end < open file. ({ymlPath})");
 
-            string[] ymlLines = File.ReadAllLines(ymlPath);
-            StringBuilder sb = new StringBuilder();
-
-            foreach (string line in ymlLines)
-            {
-                sb.AppendLine(line);
-            }
-
-            txtOrigin.Text = sb.ToString();
+            string yaml = File.ReadAllText(ymlPath);
+            txtOrigin.Text = yaml;
         }
 
         /// <summary>

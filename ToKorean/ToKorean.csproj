@@ -1,17 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>ToKorean</AssemblyName>
-    <RootNamespace>ToKorean</RootNamespace>
+    <AssemblyName>ToKorean.Winform</AssemblyName>
+    <RootNamespace>ToKorean.Winform</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Http\**" />
+    <Compile Remove="Translater\**" />
+    <EmbeddedResource Remove="Http\**" />
+    <EmbeddedResource Remove="Translater\**" />
+    <None Remove="Http\**" />
+    <None Remove="Translater\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="IO\ILogManager.cs" />
+    <Compile Remove="IO\LogManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="YamlDotNet" Version="15.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IO\IO.csproj" />
+    <ProjectReference Include="..\Translater\Translater.csproj" />
   </ItemGroup>
 
   <ItemGroup>

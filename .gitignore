@@ -339,7 +339,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
-# @devman 2020.07.15
 # Visual Studio Code
 .vscode/*
 !.vscode/settings.json
@@ -350,3 +349,6 @@ healthchecksdb
 
 # Local History for Visual Studio Code
 .history/
+
+# Folder
+ToKoreanForASP/

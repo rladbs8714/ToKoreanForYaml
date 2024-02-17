@@ -1,6 +1,6 @@
-﻿namespace ToKorean.Http
+﻿namespace Web.Http
 {
-    internal class HttpHelper : IDisposable
+    public class HttpHelper : IDisposable
     {
 
         // ==============================================================================
@@ -21,8 +21,8 @@
         /// Http 요청자
         /// </summary>
         protected HttpClient Client { get; private set; }
-        
-        
+
+
         // ==============================================================================
         // CONSTRUCTOR
         // ==============================================================================
@@ -63,7 +63,7 @@
         /// <param name="postContent">Post할 컨텐츠</param>
         /// <param name="uri">추가할 uri</param>
         /// <returns>Response된 메시지</returns>
-        internal async Task<string> PostAsync(StringContent postContent, string uri = "")
+        public async Task<string> PostAsync(StringContent postContent, string uri = "")
         {
             if (!string.IsNullOrEmpty(uri) &&
                 !Uri.IsWellFormedUriString(uri, UriKind.RelativeOrAbsolute))
@@ -94,7 +94,7 @@
             return responseMsg;
         }
 
-        
+
         // ==============================================================================
         // DISPOSABLE
         // ==============================================================================

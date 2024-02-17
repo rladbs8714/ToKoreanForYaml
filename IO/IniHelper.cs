@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ToKorean.Parser
+namespace IO
 {
 
     // ==================================================================================
@@ -14,7 +14,7 @@ namespace ToKorean.Parser
     // 2. 섹션은 대문자로 작성되어야 한다.
     // 3. 키는 팟홀 패턴으로 작성되어야 한다.
 
-    internal class IniHelper
+    public class IniHelper
     {
 
         // ==============================================================================
@@ -31,15 +31,22 @@ namespace ToKorean.Parser
         // CONSTRUCTOR
         // ==============================================================================
 
+        [Obsolete]
         private IniHelper()
         {
-            Path = "";
+            Path = string.Empty;
         }
 
+        /// <summary>
+        /// 경로의 ini파일 참조를 생성한다.
+        /// 기본값은 상대 경로의 ini\System.ini 이다.
+        /// </summary>
+        /// <param name="iniFilePath">참조할 ini파일</param>
+        /// <exception cref="FileNotFoundException">파일을 찾을 수 없다면 </exception>
         public IniHelper(string iniFilePath = "")
         {
             if (string.IsNullOrEmpty(iniFilePath))
-                iniFilePath = System.IO.Path.Combine("ini", "Papago.ini");
+                iniFilePath = System.IO.Path.Combine("ini", "System.ini");
 
             if (!File.Exists(iniFilePath))
                 throw new FileNotFoundException(Path);
@@ -57,7 +64,7 @@ namespace ToKorean.Parser
         /// </summary>
         /// <param name="key">값을 찾을 키</param>
         /// <param name="section">키가 있을 섹션. 기본값 "PAPAGO"</param>
-        public string Read(string key, string section = "PAPAGO")
+        public string Read(string key, string section)
         {
             var retVal = new StringBuilder(255);
             GetPrivateProfileString(section, key, "", retVal, 255, Path);
